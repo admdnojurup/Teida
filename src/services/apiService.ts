@@ -1,5 +1,3 @@
-import { creditBalanceService } from './creditBalanceService';
-
 interface TranslationStartParams {
   file: File;
   fromLang: string;
@@ -27,7 +25,7 @@ interface TranslationStartResponse {
 }
 
 class ApiService {
-  private readonly API_BASE_URL = '/api';
+  private readonly API_BASE_URL = '/api/translation';
 
   async startTranslation(params: TranslationStartParams): Promise<TranslationStartResponse> {
     try {
@@ -38,7 +36,7 @@ class ApiService {
       formData.append('model', params.model);
       formData.append('shouldTranslateImage', params.shouldTranslateImage);
 
-      const response = await fetch(`${this.API_BASE_URL}/translate`, {
+      const response = await fetch(`${this.API_BASE_URL}/start`, {
         method: 'POST',
         body: formData,
       });
@@ -52,6 +50,7 @@ class ApiService {
       return {
         success: true,
         taskId: data.taskId,
+        message: data.message,
       };
     } catch (error) {
       console.error('Error starting translation:', error);
@@ -64,7 +63,7 @@ class ApiService {
 
   async checkTranslationStatus(taskId: string): Promise<TranslationStatusResponse> {
     try {
-      const response = await fetch(`${this.API_BASE_URL}/translate/status/${taskId}`);
+      const response = await fetch(`${this.API_BASE_URL}/status/${taskId}`);
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -72,12 +71,6 @@ class ApiService {
       }
 
       const data = await response.json();
-      
-      // Update credit balance if translation is completed
-      if (data.status === 'completed') {
-        await creditBalanceService.fetchCreditBalance();
-      }
-      
       return data;
     } catch (error) {
       console.error('Error checking translation status:', error);
