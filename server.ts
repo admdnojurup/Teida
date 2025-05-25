@@ -23,7 +23,7 @@ const PORT = process.env.PORT || 3001;
 
 // Enable CORS for all routes with specific configuration
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3001', 'http://127.0.0.1:5173', 'http://127.0.0.1:3001'],
+  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 }));
@@ -35,11 +35,11 @@ app.use(express.json());
 app.use(express.raw({ type: 'application/pdf', limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Use the API routes BEFORE the static file handling
-app.use('/api', apiApp);
+// Serve static files from the public directory for models-info.json
+app.use(express.static(join(__dirname, 'public')));
 
-// Serve static files from the dist directory
-app.use(express.static(join(__dirname, 'dist')));
+// Use the API routes
+app.use('/api', apiApp);
 
 // This catch-all route should come AFTER all API routes
 app.get('*', (req, res) => {
