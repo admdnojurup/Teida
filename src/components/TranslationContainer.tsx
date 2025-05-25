@@ -5,7 +5,6 @@ import { TranslationComplete } from './TranslationComplete';
 import { LanguageSelector } from './LanguageSelector';
 import { ModelSelector } from './ModelSelector';
 import { creditBalanceService } from '../services/creditBalanceService';
-import { apiService } from '../services/apiService';
 
 type TranslationStatus = 'idle' | 'uploading' | 'translating' | 'completed' | 'error';
 
@@ -52,7 +51,9 @@ export const TranslationContainer: React.FC = () => {
         try {
           console.log(`Checking translation status for task: ${taskId} (check #${statusCheckCount + 1})`);
           
-          const statusResult = await apiService.checkTranslationStatus(taskId);
+          const response = await fetch(`/api/translation/status/${taskId}`);
+          const statusResult = await response.json();
+          
           setStatusCheckCount(prev => prev + 1);
           
           if (statusResult.status === 'completed') {
@@ -62,7 +63,6 @@ export const TranslationContainer: React.FC = () => {
             
             // Safely handle URL values - handle both property names
             if (statusResult.translatedFileUrl) {
-              // Ensure fileUrl is a string
               const fileUrl = typeof statusResult.translatedFileUrl === 'string' 
                 ? statusResult.translatedFileUrl 
                 : String(statusResult.translatedFileUrl);
@@ -70,7 +70,6 @@ export const TranslationContainer: React.FC = () => {
               setTranslatedFileUrl(fileUrl);
               console.log('Set translated file URL:', fileUrl);
             } else if (statusResult.fileUrl) {
-              // Fallback to fileUrl if translatedFileUrl is not present
               const fileUrl = typeof statusResult.fileUrl === 'string' 
                 ? statusResult.fileUrl 
                 : String(statusResult.fileUrl);
@@ -84,7 +83,6 @@ export const TranslationContainer: React.FC = () => {
             
             // Safely handle bilingual URL - handle both property names
             if (statusResult.translatedBilingualFileUrl) {
-              // Ensure bilingualFileUrl is a string
               const bilingualUrl = typeof statusResult.translatedBilingualFileUrl === 'string'
                 ? statusResult.translatedBilingualFileUrl
                 : String(statusResult.translatedBilingualFileUrl);
@@ -92,7 +90,6 @@ export const TranslationContainer: React.FC = () => {
               setBilingualFileUrl(bilingualUrl);
               console.log('Set bilingual file URL:', bilingualUrl);
             } else if (statusResult.bilingualFileUrl) {
-              // Fallback to bilingualFileUrl if translatedBilingualFileUrl is not present
               const bilingualUrl = typeof statusResult.bilingualFileUrl === 'string'
                 ? statusResult.bilingualFileUrl
                 : String(statusResult.bilingualFileUrl);
@@ -108,7 +105,6 @@ export const TranslationContainer: React.FC = () => {
             setTokenCount(statusResult.tokenCount || null);
             setTranslationComplete(true);
             
-            // Clear interval when completed
             if (statusInterval) {
               clearInterval(statusInterval);
             }
@@ -117,7 +113,6 @@ export const TranslationContainer: React.FC = () => {
             setStatus('error');
             setError(statusResult.message || 'Įvyko nežinoma klaida');
             
-            // Clear interval on error
             if (statusInterval) {
               clearInterval(statusInterval);
             }
@@ -153,7 +148,6 @@ export const TranslationContainer: React.FC = () => {
             setStatus('error');
             setError('Nepavyko patikrinti vertimo būsenos');
             
-            // Clear interval on persistent errors
             if (statusInterval) {
               clearInterval(statusInterval);
             }
@@ -180,15 +174,11 @@ export const TranslationContainer: React.FC = () => {
   
   // Function to calculate approximate progress based on the number of status checks
   const calculateApproximateProgress = (checkCount: number): number => {
-    // Estimate progress: start slow, accelerate in the middle, slow down at the end
     if (checkCount < 5) {
-      // Initial progress (0-20%)
       return Math.min(20, checkCount * 4);
     } else if (checkCount < 15) {
-      // Middle progress (20-70%)
       return Math.min(70, 20 + (checkCount - 5) * 5);
     } else {
-      // Final progress (70-95%)
       return Math.min(95, 70 + (checkCount - 15) * 1);
     }
   };
@@ -206,18 +196,23 @@ export const TranslationContainer: React.FC = () => {
     setTokenCount(null);
     
     try {
-      // Directly start the translation process
       console.log('Starting translation process...');
       console.log('Uploading file:', uploadedFile.name, 'Size:', uploadedFile.size);
       
+      const formData = new FormData();
+      formData.append('file', uploadedFile);
+      formData.append('fromLang', sourceLanguage);
+      formData.append('toLang', targetLanguage);
+      formData.append('model', selectedModel);
+      formData.append('shouldTranslateImage', 'false');
+      
       try {
-        const result = await apiService.startTranslation({
-          file: uploadedFile,
-          fromLang: sourceLanguage,
-          toLang: targetLanguage,
-          model: selectedModel,
-          shouldTranslateImage: 'false',
+        const response = await fetch('/api/translation/start', {
+          method: 'POST',
+          body: formData,
         });
+        
+        const result = await response.json();
         
         if (result.success && result.taskId) {
           setTaskId(result.taskId);
@@ -300,7 +295,7 @@ export const TranslationContainer: React.FC = () => {
                 </div>
                 <h3 className="text-lg font-semibold mb-2">Greitas</h3>
                 <p className="text-surface-600 text-sm">
-                  Išverskite PDF failus per kelias minutes naudodami automatizuotą Eiternus debesį, kuriame gyvena Dirbtinis Intelektas 
+                  Išverskite PDF failus per kelias minutes
                 </p>
               </div>
               
@@ -315,7 +310,7 @@ export const TranslationContainer: React.FC = () => {
                 </div>
                 <h3 className="text-lg font-semibold mb-2">Lengva naudoti</h3>
                 <p className="text-surface-600 text-sm">
-                  Tiesiog numeskite savo .pdf failą arba paspauskite pasirinkti. Svarbiausia - nustatykite, kad verčiate į Lietuvių kalbą
+                  Tiesiog numeskite savo .pdf failą arba paspauskite pasirinkti
                 </p>
               </div>
               
@@ -330,7 +325,7 @@ export const TranslationContainer: React.FC = () => {
                 </div>
                 <h3 className="text-lg font-semibold mb-2">Privatumo apsauga</h3>
                 <p className="text-surface-600 text-sm">
-                  Jūsų failai automatiškai ištrinami po apdorojimo, užtikrinant duomenų privatumą
+                  Jūsų failai automatiškai ištrinami po apdorojimo
                 </p>
               </div>
             </div>
@@ -385,7 +380,8 @@ export const TranslationContainer: React.FC = () => {
                   className="btn-outline inline-flex items-center"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4">
+                    </path>
                     <polyline points="7 10 12 15 17 10"></polyline>
                     <line x1="12" y1="15" x2="12" y2="3"></line>
                   </svg>
