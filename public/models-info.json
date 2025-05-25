@@ -1,0 +1,108 @@
+{
+  "models": [
+    {
+      "id": "grok-3-mini",
+      "name": "Grok 3 Mini",
+      "description": "Greitesnis ir efektyvesnis modelis, puikiai tinkantis trumpesniems dokumentams",
+      "languages": "Palaiko visas kalbas",
+      "speed": "Greitas",
+      "recommendedFor": "Trumpi dokumentai, kasdieninis naudojimas"
+    },
+    {
+      "id": "grok-3",
+      "name": "Grok 3",
+      "description": "Galingas modelis su puikiu teksto supratimu ir vertimu",
+      "languages": "Palaiko visas kalbas",
+      "speed": "Vidutinis",
+      "recommendedFor": "Ilgesni dokumentai, reikalaujantys tikslaus turinio išlaikymo"
+    },
+    {
+      "id": "gemini-2.0-flash",
+      "name": "Gemini 2.0 Flash",
+      "description": "Greitai veikiantis, efektyvus modelis paprastiems vertimams",
+      "languages": "Palaiko daugumą populiarių kalbų",
+      "speed": "Labai greitas",
+      "recommendedFor": "Nedideli, paprasti dokumentai"
+    },
+    {
+      "id": "gemini-pro",
+      "name": "Gemini Pro",
+      "description": "Subalansuotas modelis su geru greičiu ir kokybe",
+      "languages": "Palaiko daugumą kalbų",
+      "speed": "Vidutinis",
+      "recommendedFor": "Universalus naudojimas"
+    },
+    {
+      "id": "gemini-2.5-pro",
+      "name": "Gemini 2.5 Pro",
+      "description": "Patobulinta Gemini versija su geresniu konteksto išlaikymu",
+      "languages": "Palaiko visas pagrindines kalbas",
+      "speed": "Vidutinis",
+      "recommendedFor": "Techniniai dokumentai, moksliniai tekstai"
+    },
+    {
+      "id": "claude-haiku",
+      "name": "Claude Haiku",
+      "description": "Lengvas ir greitas modelis",
+      "languages": "Palaiko daugumą Europos kalbų",
+      "speed": "Greitas",
+      "recommendedFor": "Trumpi dokumentai, kasdieninis naudojimas"
+    },
+    {
+      "id": "claude-3.7-sonnet",
+      "name": "Claude 3.7 Sonnet",
+      "description": "Pažangus modelis su subtiliu kalbos niuansų supratimu",
+      "languages": "Puikiai palaiko visas pagrindines kalbas",
+      "speed": "Vidutinis-Lėtas",
+      "recommendedFor": "Literatūros vertimai, subtilūs tekstai"
+    },
+    {
+      "id": "gpt-4.1-mini",
+      "name": "GPT-4.1 Mini",
+      "description": "Kompaktiškas GPT-4 modelis, palaikantis gerą balansą tarp greičio ir kokybės",
+      "languages": "Palaiko visas pagrindines kalbas",
+      "speed": "Greitas",
+      "recommendedFor": "Įvairūs dokumentai vidutinio sudėtingumo"
+    },
+    {
+      "id": "gpt-4.1",
+      "name": "GPT-4.1",
+      "description": "Galingas didelis kalbos modelis su puikiu konteksto supratimu",
+      "languages": "Palaiko labai platų kalbų spektrą",
+      "speed": "Lėtas",
+      "recommendedFor": "Sudėtingi dokumentai, moksliniai tekstai, teisiniai dokumentai"
+    },
+    {
+      "id": "o4-mini",
+      "name": "O4 Mini",
+      "description": "Efektyvus, mažesnis modelis kasdieniniam naudojimui",
+      "languages": "Palaiko pagrindinę kalbų grupę",
+      "speed": "Greitas",
+      "recommendedFor": "Paprasti dokumentai, kasdieninis naudojimas"
+    },
+    {
+      "id": "deepseek-v3",
+      "name": "DeepSeek V3",
+      "description": "Specialiai pritaikytas giliam teksto supratimui",
+      "languages": "Gerai veikia su Azijos kalbomis",
+      "speed": "Vidutinis",
+      "recommendedFor": "Techniniai dokumentai, specializuoti tekstai"
+    },
+    {
+      "id": "deepseek-r1",
+      "name": "DeepSeek R1",
+      "description": "Naujausia karta su pagerinta teksto kokybe",
+      "languages": "Palaiko platų kalbų spektrą",
+      "speed": "Vidutinis-Lėtas",
+      "recommendedFor": "Sudėtingi dokumentai, kuriems reikia aukštos kokybės"
+    },
+    {
+      "id": "llama-4-maverick",
+      "name": "Llama 4 Maverick",
+      "description": "Atviro kodo modelis su patobulintomis galimybėmis",
+      "languages": "Palaiko daugumą pagrindinių kalbų",
+      "speed": "Vidutinis",
+      "recommendedFor": "Įvairūs tekstai, kai svarbu išlaikyti originalią formatą"
+    }
+  ]
+}

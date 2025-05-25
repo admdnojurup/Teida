@@ -1,0 +1,32 @@
+import express from 'express';
+import cors from 'cors';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import { apiApp } from './src/api/index.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+// Enable CORS for all routes
+app.use(cors());
+
+// Parse JSON request bodies
+app.use(express.json());
+
+// Use the API app as middleware
+app.use('/api', apiApp);
+
+// Serve static files from the dist directory
+app.use(express.static(join(__dirname, 'dist')));
+
+// For any other request, send the index.html file
+app.get('*', (req, res) => {
+  res.sendFile(join(__dirname, 'dist', 'index.html'));
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
