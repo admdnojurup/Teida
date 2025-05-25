@@ -24,16 +24,14 @@ export const TranslationContainer: React.FC = () => {
   const [tokenCount, setTokenCount] = useState<number | null>(null);
   const [selectedModel, setSelectedModel] = useState('grok-3-mini');
   
-  // Constants for polling configuration
-  const INITIAL_CHECK_INTERVAL = 3000; // 3 seconds for first checks
-  const STANDARD_CHECK_INTERVAL = 10000; // 10 seconds for regular polling
-  const SLOW_CHECK_INTERVAL = 20000; // 20 seconds after extended processing
-  const MAX_WAIT_TIME = 20 * 60 * 1000; // 20 minutes
+  const INITIAL_CHECK_INTERVAL = 3000;
+  const STANDARD_CHECK_INTERVAL = 10000;
+  const SLOW_CHECK_INTERVAL = 20000;
+  const MAX_WAIT_TIME = 20 * 60 * 1000;
   const MAX_CHECK_COUNT = Math.ceil(MAX_WAIT_TIME / STANDARD_CHECK_INTERVAL);
-  const TRANSITION_TO_STANDARD = 3; // After 3 checks, move to standard interval
-  const TRANSITION_TO_SLOW = 12; // After 12 checks (~2 minutes), slow down polling
+  const TRANSITION_TO_STANDARD = 3;
+  const TRANSITION_TO_SLOW = 12;
 
-  // Refresh credit balance after successful translation
   useEffect(() => {
     if (status === 'completed') {
       creditBalanceService.fetchCreditBalance()
@@ -42,7 +40,6 @@ export const TranslationContainer: React.FC = () => {
     }
   }, [status]);
 
-  // Status polling effect
   useEffect(() => {
     let statusInterval: number | undefined;
     
@@ -52,6 +49,10 @@ export const TranslationContainer: React.FC = () => {
           console.log(`Checking translation status for task: ${taskId} (check #${statusCheckCount + 1})`);
           
           const response = await fetch(`/api/translation/status/${taskId}`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
           const statusResult = await response.json();
           
           setStatusCheckCount(prev => prev + 1);
@@ -61,7 +62,6 @@ export const TranslationContainer: React.FC = () => {
             setStatus('completed');
             setProgress(100);
             
-            // Safely handle URL values - handle both property names
             if (statusResult.translatedFileUrl) {
               const fileUrl = typeof statusResult.translatedFileUrl === 'string' 
                 ? statusResult.translatedFileUrl 
@@ -81,7 +81,6 @@ export const TranslationContainer: React.FC = () => {
               setTranslatedFileUrl(null);
             }
             
-            // Safely handle bilingual URL - handle both property names
             if (statusResult.translatedBilingualFileUrl) {
               const bilingualUrl = typeof statusResult.translatedBilingualFileUrl === 'string'
                 ? statusResult.translatedBilingualFileUrl
@@ -117,12 +116,10 @@ export const TranslationContainer: React.FC = () => {
               clearInterval(statusInterval);
             }
           } else {
-            // Update progress
             const newProgress = statusResult.progress || calculateApproximateProgress(statusCheckCount);
             setProgress(newProgress);
             console.log(`Translation in progress: ${newProgress}%`);
             
-            // Adjust check interval based on number of checks
             if (statusCheckCount === TRANSITION_TO_STANDARD && statusInterval) {
               console.log('Switching to standard polling interval');
               clearInterval(statusInterval);
@@ -133,7 +130,6 @@ export const TranslationContainer: React.FC = () => {
               statusInterval = window.setInterval(checkTranslationStatus, SLOW_CHECK_INTERVAL);
             }
             
-            // Check if max wait time exceeded
             if (statusCheckCount >= MAX_CHECK_COUNT) {
               setStatus('error');
               setError('Viršytas maksimalus vertimo laukimo laikas');
@@ -143,7 +139,6 @@ export const TranslationContainer: React.FC = () => {
         } catch (err) {
           console.error('Error checking translation status:', err);
           
-          // Don't immediately fail on a single error - allow retries
           if (statusCheckCount > 5) {
             setStatus('error');
             setError('Nepavyko patikrinti vertimo būsenos');
@@ -156,12 +151,8 @@ export const TranslationContainer: React.FC = () => {
       }
     };
     
-    // Start polling if we have a taskId and are in translating status
     if (taskId && status === 'translating') {
-      // Initial check after a short delay
       setTimeout(checkTranslationStatus, 1000);
-      
-      // Then start regular polling
       statusInterval = window.setInterval(checkTranslationStatus, INITIAL_CHECK_INTERVAL);
     }
     
@@ -172,7 +163,6 @@ export const TranslationContainer: React.FC = () => {
     };
   }, [taskId, status]);
   
-  // Function to calculate approximate progress based on the number of status checks
   const calculateApproximateProgress = (checkCount: number): number => {
     if (checkCount < 5) {
       return Math.min(20, checkCount * 4);
@@ -206,33 +196,29 @@ export const TranslationContainer: React.FC = () => {
       formData.append('model', selectedModel);
       formData.append('shouldTranslateImage', 'false');
       
-      try {
-        const response = await fetch('/api/translation/start', {
-          method: 'POST',
-          body: formData,
-        });
-        
-        const result = await response.json();
-        
-        if (result.success && result.taskId) {
-          setTaskId(result.taskId);
-          setStatus('translating');
-          setProgress(0);
-          console.log(`Translation started with task ID: ${result.taskId}`);
-        } else {
-          setStatus('error');
-          setError(result.message || 'Nepavyko pradėti vertimo');
-          console.error('Failed to start translation:', result.message);
-        }
-      } catch (err) {
-        console.error('API request error:', err);
-        setStatus('error');
-        setError('Serveris nepasiekiamas. Įsitikinkite, kad paleistas backend serveris naudojant "npm run server" arba "npm run dev:all"');
+      const response = await fetch('/api/translation/start', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success && result.taskId) {
+        setTaskId(result.taskId);
+        setStatus('translating');
+        setProgress(0);
+        console.log(`Translation started with task ID: ${result.taskId}`);
+      } else {
+        throw new Error(result.message || 'Nepavyko pradėti vertimo');
       }
     } catch (err) {
+      console.error('API request error:', err);
       setStatus('error');
-      setError('Nepavyko pradėti vertimo proceso');
-      console.error(err);
+      setError(err instanceof Error ? err.message : 'Nepavyko pradėti vertimo proceso');
     }
   }, [sourceLanguage, targetLanguage, selectedModel]);
 
