@@ -4,10 +4,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { apiApp } from './src/api/index';
 import fs from 'fs';
-import dotenv from 'dotenv';
-
-// Load environment variables
-dotenv.config();
+import { env } from './src/config/env';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -19,7 +16,6 @@ if (!fs.existsSync(tempDir)) {
 }
 
 const app = express();
-const PORT = process.env.PORT || 3001;
 
 // Enable CORS for all routes with specific configuration
 app.use(cors({
@@ -46,7 +42,8 @@ app.get('*', (req, res) => {
   res.sendFile(join(__dirname, 'dist', 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`API available at http://localhost:${PORT}/api`);
+app.listen(env.PORT, () => {
+  console.log(`Server running on port ${env.PORT}`);
+  console.log(`API available at http://localhost:${env.PORT}/api`);
+  console.log(`Environment: ${env.NODE_ENV}`);
 });
