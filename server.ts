@@ -21,23 +21,27 @@ if (!fs.existsSync(tempDir)) {
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Enable CORS for all routes
+// Enable CORS for all routes with specific configuration
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: ['http://localhost:5173', 'http://localhost:3001', 'http://127.0.0.1:5173', 'http://127.0.0.1:3001'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 }));
 
-// Parse JSON body
+// Parse JSON body - this is critical for handling JSON requests
 app.use(express.json());
 
-// Use the API app as middleware
+// Handle file uploads
+app.use(express.raw({ type: 'application/pdf', limit: '50mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Use the API routes BEFORE the static file handling
 app.use('/api', apiApp);
 
 // Serve static files from the dist directory
 app.use(express.static(join(__dirname, 'dist')));
 
-// For any other request, send the index.html file
+// This catch-all route should come AFTER all API routes
 app.get('*', (req, res) => {
   res.sendFile(join(__dirname, 'dist', 'index.html'));
 });
@@ -45,20 +49,4 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`API available at http://localhost:${PORT}/api`);
-  
-  // Check if API key is configured - handle safely to avoid type errors
-  const apiKey = process.env.OTRANSLATOR_API_KEY;
-  
-  // Safely check if the API key is defined and not empty
-  if (!apiKey) {
-    console.warn('\x1b[33m%s\x1b[0m', 'WARNING: OTRANSLATOR_API_KEY environment variable is not set. PDF translations will not work.');
-  } else {
-    // Convert to string explicitly and then check if it's empty
-    const apiKeyStr = String(apiKey);
-    if (apiKeyStr.trim() === '') {
-      console.warn('\x1b[33m%s\x1b[0m', 'WARNING: OTRANSLATOR_API_KEY environment variable is empty. PDF translations will not work.');
-    } else {
-      console.log('API key configured successfully.');
-    }
-  }
 });
